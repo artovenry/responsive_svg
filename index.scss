@@ -14,13 +14,13 @@ aside{
   position: fixed;top:0;left:0;
   width: 20vw;
   height: 70vh;
-  border: 1px solid red;
+  // border: 1px solid red;
 
   display: flex;
-}
-
-svg{
-  width: 100%;
-  background: $GRAY;
-  &.resizing{visibility: hidden;}
+  >svg{
+    width: 100%;
+    background: $GRAY;
+    &.resizing{visibility: hidden;}
+    circle, path{fill: green;}
+  }
 }
