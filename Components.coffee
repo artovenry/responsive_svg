@@ -35,7 +35,7 @@ export default
             {@$slots.default}
           </animateMotion>
         mounted: ->@$el.beginElement()
-    props: ["index"]
+    props: ["position"]
     data: ->animationFinished: no
     computed: {
       mapState(["animating", "drop"])...
@@ -45,9 +45,7 @@ export default
       WIDTH= @drop.width;D= @drop.width + @drop.margin
       <g
         transform={
-          if @animating
-            "translate(-#{WIDTH / 2} -#{WIDTH / 2})"
-          else if @animationFinished
+          if @animationFinished
             """
               translate(#{@origin.end.x} #{@origin.end.y})
               translate(-#{WIDTH / 2} -#{WIDTH / 2})
@@ -56,8 +54,10 @@ export default
             """
               translate(-#{D} #{D})
               translate(#{@origin.begin.x} #{@origin.begin.y})
-              translate(-#{WIDTH / 2} -#{WIDTH / 2})
             """
+          + """
+              translate(-#{WIDTH / 2} -#{WIDTH / 2})
+          """
         }
       >
         <svg
@@ -65,23 +65,13 @@ export default
           onClick={=>@$store.commit "begin"}
           width={WIDTH} height={WIDTH}
         >
-          <path stroke="none" d={CUBE} fill="currentColor">
-            {if @animating
-              <morphing dur="2s" fill="freeze" />
-            }
+          <path stroke="none" d={if @animationFinished then CIRCLE else CUBE} fill="currentColor">
+            {if @animating then <morphing dur="2s" fill="freeze" />}
           </path>
         </svg>
-        <path id="wine"
-          d={"
-            M #{@origin.begin.x} #{@origin.begin.y}
-            m -#{D} #{D}
-            L #{@origin.end.x} #{@origin.end.y}
-          "}
-          stroke-width="1" stroke="red"
-        />
         {if @animating
-          <move dur="2s" onFinish={=>@animationFinished= yes}>
-            <mpath href="#wine" />
+          <move dur="2s" onFinish={=>@$store.commit "end";@animationFinished= yes}>
+            <mpath href={"#mpath-#{8}"} />
           </move>
         }
       </g>

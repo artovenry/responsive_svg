@@ -1,6 +1,6 @@
 require "./index.scss"
 import {throttle} from "underscore"
-import {mapState} from "vuex"
+import {mapState,mapGetters} from "vuex"
 import Components from "./Components.coffee"
 Vue.use Vuex
 new Vue
@@ -23,6 +23,7 @@ new Vue
 
     mutations:
       begin: (state)->state.animating= on
+      end:(state)->state.animating= off
       init: (state, data)->
         state.svgWidth= data.container.width
         state.svgHeight= data.container.height
@@ -30,6 +31,8 @@ new Vue
 
   computed: {
     onResizeCb: -> throttle @onInit, 10
+    mapState(["drop"])...
+    mapGetters(["origin"])...
   }
   methods:
     calc: ->
@@ -46,7 +49,21 @@ new Vue
       <header><span>header</span></header>
       <aside>
         <svg viewBox={"0 0 #{@$store.state.svgWidth} #{@$store.state.svgHeight}"} >
-          <drop index="8" />
+          <drop
+            position={
+              begin: 
+            }
+          />
+
+          {D= @drop.width + @drop.margin}
+          <path id="mpath-8"
+            d={"
+              M #{@origin.begin.x} #{@origin.begin.y}
+              m -#{D} #{D}
+              L #{@origin.end.x} #{@origin.end.y}
+            "}
+            stroke-width="1" stroke="red"
+          />
 
         </svg>
       </aside>
