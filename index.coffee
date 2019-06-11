@@ -1,45 +1,30 @@
 require "./index.scss"
 import {throttle} from "underscore"
-import {mapState,mapGetters} from "vuex"
 import Drop from "./Drop.coffee"
-import store from "./store"
+import store from "./store.coffee"
+import figures from "./figures.coffee"
 Vue.use Vuex
 new Vue
   el: "#root"
   components: {Drop}
   store: new Vuex.Store store
-  computed: {
-    onResizeCb: -> throttle @onInit, 10
-  }
+  computed: onResizeCb: -> throttle @onInit, 10
   methods:
-    calc: ->
+    onInit: -> @$store.commit "init", do =>
       container: @$el.querySelector("aside").getBoundingClientRect()
       header: @$el.querySelector("header").getBoundingClientRect()
-    onInit: -> @$store.commit "init", @calc()
-  mounted: ->
-    @onInit()
-    window.addEventListener "resize", @onResizeCb
+  mounted: ->@onInit();window.addEventListener "resize", @onResizeCb
   render: (h)->
     <div id="root">
       <header><span>header</span></header>
       <aside>
-        <svg viewBox={"0 0 #{@$store.state.svgWidth} #{@$store.state.svgHeight}"} >
-          <drop
-            position={
-              begin:
-            }
-          />
-
-          {D= @drop.width + @drop.margin}
-          <path id="mpath-8"
-            d={"
-              M #{@origin.begin.x} #{@origin.begin.y}
-              m -#{D} #{D}
-              L #{@origin.end.x} #{@origin.end.y}
-            "}
+        <svg viewBox={"0 0 #{@$store.state.layout.svgWidth} #{@$store.state.layout.svgHeight}"} >
+          <drop index={0}></drop>
+          <path
+            id={"mpath-#{0}"}
             stroke-width="1" stroke="red"
-          />
-
+            d={@$store.getters.motionPath(0)}
+          ></path>
         </svg>
       </aside>
     </div>

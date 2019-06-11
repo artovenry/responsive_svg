@@ -1,54 +1,55 @@
-import {mapState, mapGetters} from "vuex"
+import figures from "./figures.coffee"
+import {mapGetters} from "vuex"
 
 export default
-  components:
-    Morphing:
-      render: (h)->
-        <animate begin="beginEvent" attributeName="d" from={CUBE} to={CIRCLE} />
-      mounted: ->@$el.beginElement()
-    Move:
-      render: (h)->
-        <animateMotion begin="beginEvent" onEndEvent={=>@$emit("finish")}>
-          {@$slots.default}
-        </animateMotion>
-      mounted: ->@$el.beginElement()
-  props: ["position"]
-  data: ->animationFinished: no
+  props: ["index"]
+  data: ->
+    duration: "1s"
+    direction: "vertical"
   computed: {
-    mapState(["animating", "drop"])...
-    mapGetters(["origin"])...
+    position: ->@$store.state.animation.items[@index]
+    mapGetters(["onAnimating", "onGrid", "onVertical", "gridDelta", "verticalDelta"])...
   }
+  watch: position: (newVal, oldVal)->
+    @direction= if oldVal is 0 then "vertical" else "grid"
+    @startAnimation() if newVal is 1
+  methods:
+    onClick: ->unless @onAnimating() then @$store.commit "toggleOn"
+    onAnimationEnd: ->if @onAnimating() then @$store.commit "toggleOff", index: @index, direction: @direction
+    startAnimation: ->
+      @$el.querySelector("animate").beginElement()
+      @$el.querySelector("animateMotion").beginElement()
+
   render: (h)->
-    WIDTH= @drop.width;D= @drop.width + @drop.margin
-    <g
-      transform={
-        if @animationFinished
-          """
-            translate(#{@origin.end.x} #{@origin.end.y})
-            translate(-#{WIDTH / 2} -#{WIDTH / 2})
-          """
-        else
-          """
-            translate(-#{D} #{D})
-            translate(#{@origin.begin.x} #{@origin.begin.y})
-          """
-        + """
-            translate(-#{WIDTH / 2} -#{WIDTH / 2})
-        """
+    <g transform={
+        if @onGrid(@index)
+          "translate(#{@gridDelta(@index).dx} #{@gridDelta(@index).dy})"
+        else if @onVertical(@index)
+          "translate(#{@verticalDelta(@index).dx} #{@verticalDelta(@index).dy})"
       }
     >
-      <svg
-        viewBox="0 0 2 2"
-        onClick={=>@$store.commit "begin"}
-        width={WIDTH} height={WIDTH}
-      >
-        <path stroke="none" d={if @animationFinished then CIRCLE else CUBE} fill="currentColor">
-          {if @animating then <morphing dur="2s" fill="freeze" />}
-        </path>
-      </svg>
-      {if @animating
-        <move dur="2s" onFinish={=>@$store.commit "end";@animationFinished= yes}>
-          <mpath href={"#mpath-#{8}"} />
-        </move>
-      }
+      <g transform={"translate(-#{figures.dropRadius} -#{figures.dropRadius})"}>
+        <animateMotion
+          dur={@duration}
+          begin="beginEvent"
+          onEndEvent={@onAnimationEnd}
+          keyPoints={if @direction is "vertical" then "0;1" else "1;0"}
+          keyTimes="0;1"
+        >
+          <mpath href={"#mpath-#{@index}"} />
+        </animateMotion>
+
+        <svg viewBox="0 0 2 2" width={figures.dropWidth} height={figures.dropWidth} onClick={@onClick}>
+          <path d={figures[figures[if @onGrid(@index) then 'grid' else 'vertical']?.figure]}>
+            <animate attributeName="d"
+              dur={@duration} fill="freeze"
+              begin="beginEvent"
+              keyPoints={if @direction is "vertical" then "0;1" else "1;0"}
+              keyTimes="0;1"
+              from={figures.grid.figure}
+              to={figures.vertical.figure}
+            />
+          </path>
+        </svg>
+      </g>
     </g>
