@@ -1,10 +1,5 @@
 $GRAY: rgba(233,233,233, 0.5);
 $HEADER_HEIGHT: 10vh;
-// remove svg's reset by reboot
-svg{
-  vertical-align: top;
-}
-
 header{
   z-index: 1;
   position: fixed;top:0;left:0;
@@ -19,13 +14,13 @@ aside{
   position: fixed;top:0;left:0;
   width: 20vw;
   height: 70vh;
+  // border: 1px solid red;
 
   display: flex;
-  .container{
+  >svg{
     width: 100%;
     background: $GRAY;
     &.resizing{visibility: hidden;}
     circle, path{fill: green;}
-    .drop{path{fill: red;}}
   }
 }
