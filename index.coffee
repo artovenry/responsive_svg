@@ -19,12 +19,16 @@ new Vue
       <header><span>header</span></header>
       <aside>
         <svg viewBox={"0 0 #{@$store.state.layout.svgWidth} #{@$store.state.layout.svgHeight}"} >
-          <drop index={0}></drop>
-          <path
-            id={"mpath-#{0}"}
-            stroke-width="1" stroke="red"
-            d={@$store.getters.motionPath(0)}
-          ></path>
+          {for noop, index in [0, 0, 0, 0, 0, 0, 0, 0, 0]
+            <path
+              id={"mpath-#{index}"}
+              stroke-width=".25" stroke="red"
+              d={@$store.getters.motionPath(index)}
+            ></path>
+          }
+          {for noop, index in [0, 0, 0, 0, 0, 0, 0, 0, 0]
+            <drop index={index}></drop>
+          }
         </svg>
       </aside>
     </div>

@@ -35,19 +35,19 @@ export default
           onEndEvent={@onAnimationEnd}
           keyPoints={if @direction is "vertical" then "0;1" else "1;0"}
           keyTimes="0;1"
+          calcMode="linear"
         >
           <mpath href={"#mpath-#{@index}"} />
         </animateMotion>
 
         <svg viewBox="0 0 2 2" width={figures.dropWidth} height={figures.dropWidth} onClick={@onClick}>
-          <path d={figures[figures[if @onGrid(@index) then 'grid' else 'vertical']?.figure]}>
+          <path d={figures[figures[if @onGrid(@index) then 'grid' else if @onVertical(@index) then 'vertical']?.figure]}>
             <animate attributeName="d"
-              dur={@duration} fill="freeze"
+              dur={@duration}
               begin="beginEvent"
-              keyPoints={if @direction is "vertical" then "0;1" else "1;0"}
-              keyTimes="0;1"
-              from={figures.grid.figure}
-              to={figures.vertical.figure}
+              from={figures[figures[if @direction is "vertical" then "grid" else "vertical"].figure]}
+              to={figures[figures[unless @direction is "vertical" then "grid" else "vertical"].figure]}
+              calcMode="paced"
             />
           </path>
         </svg>
