@@ -38,7 +38,6 @@ new Vue
     gridPoints: (index)->
       x: @container.w / 2 - SIZE / 2 + (SIZE + MARGIN) * MATRIX_GRID[index][0]
       y: @header.h / 2 - SIZE / 2 + (SIZE + MARGIN) * MATRIX_GRID[index][1]
-
     calcLayout: ->
       aside= @$el.querySelector("aside").getBoundingClientRect()
       header= @$el.querySelector("header").getBoundingClientRect()
@@ -46,7 +45,8 @@ new Vue
       @header.h= header.height
     onClickGrid: ->
       @positions.splice i, 1, ON_ANIMATING_TO_VERTICAL for noop, i in @positions
-
+    onReachVertical: ->
+      @positions.splice i, 1, ON_ANIMATING_TO_VERTICAL for noop, i in @positions
   mounted: ->
     @calcLayout()
     window.addEventListener "resize", @resizer
@@ -72,10 +72,10 @@ new Vue
                   <path d={PATH(CUBE_BEZIER)}>
                   </path>
                 </svg>
-                <animateMotion dur="1s" begin="beginEvent">
-                  <mpath href={"#mpath-#{index}"} />
-                </animateMotion>
               </g>
+              {if @positions[index] is ON_ANIMATING_TO_VERTICAL
+                <motion index={index} />
+              }
             </g>
           }
 
@@ -95,13 +95,16 @@ new Vue
   components:
     SvgCube: render: (h)->
       <svg viewBox="0 0 2 2" width={SIZE} height={SIZE}>
-        <path d={PATH(CUBE_BEZIER)}>
-          {@$slots.default}
-        </path>
+        <path d={PATH(CUBE_BEZIER)} />
       </svg>
     SvgCircle: render: (h)->
       <svg viewBox="0 0 2 2" width={SIZE} height={SIZE}>
-        <path d={PATH(CIRCLE_BEZIER)}>
-          {@$slots.default}
-        </path>
+        <path d={PATH(CIRCLE_BEZIER)} />
       </svg>
+    MotionToGrid:
+      props: ["index"]
+      render: (h)->
+        <animateMotion dur="1s" begin="beginEvent" onEndEvent="onReachVertical">
+          <mpath href={"#mpath-#{@index}"} />
+        </animateMotion>
+      mounted: ->@$el.beginElement()
